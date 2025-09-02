@@ -1,2 +1,148 @@
 First, Make it work
 Then Make it right
+
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+
+interface IProduct{
+    int getId();
+    String getName();
+    int getPrice();
+}
+
+class Product implements IProduct{
+    int id;
+    String name;
+    int price;
+    int shippingCost;
+
+    Product(int id, String name, int c, int d, int e){
+        this.id = id;
+        this.name = name;
+    }
+
+    @Override
+    public int getId(){
+        return this.id;
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
+    }
+
+    @Override
+    public int getPrice(){
+        return 0;
+    }
+}
+
+class Node{
+    Product product;
+    int quantity;
+
+    public Node(Product product, int quantity) {
+        this.product = product;
+        this.quantity = quantity;
+    }
+}
+
+
+class User {
+    int id;
+
+    int getId(){
+        return this.id;
+    }
+}
+
+class Company {
+
+    List<User> users;
+    List<Node> products;
+
+    Company(){
+        this.users = new ArrayList<>();
+    }
+
+    void addProduct(Product product){
+
+    }
+
+    List<User> getUsers(){
+        return this.users;
+    }
+
+    List<Node> getProducts(){
+        return this.products;
+    }
+
+    public void makeOeder(List<Node> orderProducts, User u) {
+    }
+}
+
+
+//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
+// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+public class Main {
+    public static void main(String[] args) throws Exception {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        PrintWriter writer = new PrintWriter("/Users/poonamka/output/hackerTest/result.txt", "UTF-8");
+
+        Company company = new Company();
+
+        int productCount = Integer.parseInt(reader.readLine().trim());
+        for (int i=0; i < productCount; i++){
+            String[] a = reader.readLine().trim().split(",");
+            company.addProduct(
+                    new Product( Integer.parseInt(a[0])
+                    , a[1]
+                    , Integer.parseInt(a[2])
+                    , Integer.parseInt(a[3])
+                    , Integer.parseInt(a[4]))
+            );
+        }
+
+        int orderCount = Integer.parseInt(reader.readLine().trim());
+        for (int i =0; i < orderCount; i++){
+            String[] a = reader.readLine().trim().split(",");
+            User u = company.getUsers().stream()
+                    .filter(x -> x.getId() == Integer.parseInt(a[0]))
+                    .findFirst()
+                    .orElse(null);
+
+            if (u == null){
+                throw new Exception("User not found");
+            }
+
+            List<Node> orderProducts = new ArrayList<>();
+            for (int j = 1; j < a.length; j++){
+                String[] b = a[j].split("\\|");
+                Node curr = company.getProducts().stream()
+                        .filter(x-> x.product.getId() == Integer.parseInt(b[0]))
+                        .findFirst()
+                        .orElse(null);
+
+                if(curr != null){
+                    Node c = new Node(curr.product, Integer.parseInt(b[1]));
+                    orderProducts.add(c);
+                }
+
+            }
+            company.makeOeder(orderProducts, u);
+        }
+        List<String> output = company.getProducts().stream()
+                .sorted(Comparator.comparing(x -> x.product.getId()))
+                .map(x -> x.product.getName() + ";" + x.quantity)
+                .collect(Collectors.toList());
+        writer.write(String.join("\n", output));
+        writer.flush();
+        writer.close();
+    }
+}
